@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Booking System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #799197;
+            color: #030303;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-12 px-4">
+
+    <header class="w-full max-w-4xl text-center mb-12">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+            The Grand Oasis
+        </h1>
+        <p class="mt-4 text-xl text-gray-600">
+            Effortless Room Booking & Management
+        </p>
+    </header>
+
+    <main class="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row gap-8">
+
+        <section class="flex-1">
+            <h2 class="text-3xl font-semibold mb-6 text-gray-800">Room Status</h2>
+            <div class="mb-4 text-lg text-gray-600 font-medium space-y-1">
+                <p>Total Rooms: <span id="total-rooms-count" class="font-bold text-gray-800">0</span></p>
+                <p>Booked Rooms: <span id="booked-count" class="font-bold text-gray-800">0</span></p>
+                <p>Total Floors: <span id="total-floors-count" class="font-bold text-gray-800">0</span></p>
+            </div>
+            <div id="room-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <section class="flex-1">
+            <h2 class="text-3xl font-semibold mb-6 text-gray-800">Book Your Room</h2>
+            <form id="booking-form" class="space-y-4">
+                <div class="space-y-2">
+                    <label for="room-select" class="block text-sm font-medium text-gray-700">Select a Room</label>
+                    <select id="room-select" name="room" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2">
+                        <option value="">-- Please select an available room --</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label for="check-in-date" class="block text-sm font-medium text-gray-700">Check-in Date</label>
+                    <input type="date" id="check-in-date" name="checkIn" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="check-out-date" class="block text-sm font-medium text-gray-700">Check-out Date</label>
+                    <input type="date" id="check-out-date" name="checkOut" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="persons" class="block text-sm font-medium text-gray-700">Number of Persons</label>
+                    <input type="number" id="persons" name="persons" min="1" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2">
+                </div>
+                <div class="space-y-2">
+                    <label for="payment-method" class="block text-sm font-medium text-gray-700">Payment Method</label>
+                    <select id="payment-method" name="paymentMethod" required class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2">
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="PayPal">PayPal</option>
+                        <option value="Cash">Cash at Check-in</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Book Now
+                </button>
+            </form>
+
+            <div id="booking-details" class="mt-8 hidden p-6 bg-green-50 border-l-4 border-green-400 rounded-lg shadow-sm">
+                <h3 class="text-xl font-bold text-green-800">Booking Confirmed!</h3>
+                <p id="booking-info" class="mt-2 text-sm text-green-700"></p>
+                <div id="payment-info" class="mt-4 p-4 bg-green-100 rounded-lg">
+                    <h4 class="text-lg font-semibold text-green-800">Payment Summary</h4>
+                    <p id="payment-details-text" class="mt-2 text-sm text-green-700"></p>
+                </div>
+            </div>
+
+            <div id="message-box" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+                <div class="bg-white rounded-lg p-6 shadow-xl w-80">
+                    <h4 id="message-title" class="text-lg font-bold text-red-600 mb-2">Error</h4>
+                    <p id="message-text" class="text-sm text-gray-700"></p>
+                    <button onclick="document.getElementById('message-box').classList.add('hidden')" class="mt-4 w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 rounded-md text-sm font-medium">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <hr class="w-full max-w-4xl my-12 border-gray-300">
+
+    <section class="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-xl">
+        <h2 class="text-3xl font-semibold mb-6 text-gray-800">Booking & Payment History</h2>
+        <div id="booking-history-list" class="space-y-4">
+            <p id="no-history-message" class="text-gray-500 italic">No bookings have been made yet in this session.</p>
+        </div>
+    </section>
+
+    <script>
+      
+        const mockRooms = [
+            { id: 101, number: '101', type: 'Single', acStatus: 'AC', floor: 1, price: 75, available: true, description: 'A cozy single room with a garden view.' },
+            { id: 102, number: '102', type: 'Double', acStatus: 'AC', floor: 1, price: 120, available: true, description: 'Spacious double room with a city skyline view.' },
+            { id: 103, number: '103', type: 'Suite', acStatus: 'AC', floor: 1, price: 250, available: true, description: 'Luxurious suite with a separate living area.' },
+            { id: 104, number: '104', type: 'Single', acStatus: 'Non-AC', floor: 2, price: 75, available: false, description: 'Currently booked. Check back later!' },
+            { id: 105, number: '105', type: 'Double', acStatus: 'Non-AC', floor: 2, price: 120, available: true, description: 'Double room perfect for families.' },
+            { id: 106, number: '106', type: 'Single', acStatus: 'AC', floor: 2, price: 75, available: true, description: 'Affordable single room.' }
+        ];
+
+    
+        let bookingHistory = [];
+
+      
+        const roomListEl = document.getElementById('room-list');
+        const roomSelectEl = document.getElementById('room-select');
+        const bookingFormEl = document.getElementById('booking-form');
+        const bookingDetailsEl = document.getElementById('booking-details');
+        const bookingInfoEl = document.getElementById('booking-info');
+        const paymentDetailsTextEl = document.getElementById('payment-details-text');
+        const messageBoxEl = document.getElementById('message-box');
+        const messageTitleEl = document.getElementById('message-title');
+        const messageTextEl = document.getElementById('message-text');
+        const bookedCountEl = document.getElementById('booked-count');
+        const totalRoomsCountEl = document.getElementById('total-rooms-count');
+        const totalFloorsCountEl = document.getElementById('total-floors-count');
+        const bookingHistoryListEl = document.getElementById('booking-history-list');
+        const noHistoryMessageEl = document.getElementById('no-history-message');
+
+        function showMessage(title, message) {
+            messageTitleEl.textContent = title;
+            messageTextEl.textContent = message;
+            messageBoxEl.classList.remove('hidden');
+        }
+
+        function updateCounts() {
+            const bookedRooms = mockRooms.filter(room => !room.available).length;
+            bookedCountEl.textContent = bookedRooms;
+            totalRoomsCountEl.textContent = mockRooms.length;
+            
+            const floors = new Set(mockRooms.map(room => room.floor));
+            totalFloorsCountEl.textContent = floors.size;
+        }
+
+        function renderBookingHistory() {
+            bookingHistoryListEl.innerHTML = '';
+            if (bookingHistory.length === 0) {
+                noHistoryMessageEl.classList.remove('hidden');
+            } else {
+                noHistoryMessageEl.classList.add('hidden');
+                bookingHistory.forEach((booking, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.classList.add('p-4', 'bg-gray-100', 'rounded-lg', 'shadow-sm', 'text-sm');
+                    historyItem.innerHTML = `
+                        <p class="font-bold text-gray-800">Booking #${index + 1}</p>
+                        <p>Room: ${booking.roomNumber} (${booking.roomType}, ${booking.acStatus}) - Floor ${booking.floor}</p>
+                        <p>Check-in: ${booking.checkInDate}</p>
+                        <p>Check-out: ${booking.checkOutDate}</p>
+                        <p>Persons: ${booking.persons}</p>
+                        <p>Total Price: $${booking.totalPrice.toFixed(2)}</p>
+                        <p>Payment Method: <span class="font-bold">${booking.paymentMethod}</span></p>
+                    `;
+                    bookingHistoryListEl.appendChild(historyItem);
+                });
+            }
+        }
+
+        function renderRooms() {
+            roomListEl.innerHTML = '';
+            roomSelectEl.innerHTML = '<option value="">-- Please select an available room --</option>';
+
+            mockRooms.forEach(room => {
+                const card = document.createElement('div');
+                card.classList.add('bg-gray-100', 'p-6', 'rounded-lg', 'shadow-md', 'border', 'border-gray-200');
+
+                let availabilityClass = room.available ? 'text-green-600' : 'text-red-600';
+                let availabilityText = room.available ? 'Available' : 'Booked';
+
+                card.innerHTML = `
+                    <h3 class="text-lg font-bold text-gray-900">Room ${room.number}</h3>
+                    <p class="mt-1 text-sm text-gray-600">${room.type} - ${room.acStatus}</p>
+                    <p class="mt-1 text-sm text-gray-600">Floor: ${room.floor}</p>
+                    <p class="mt-2 text-sm text-gray-500">${room.description}</p>
+                    <div class="mt-3 font-semibold ${availabilityClass}">${availabilityText}</div>
+                `;
+                roomListEl.appendChild(card);
+
+                if (room.available) {
+                    const option = document.createElement('option');
+                    option.value = room.id;
+                    option.textContent = `Room ${room.number} - $${room.price.toFixed(2)} (${room.type}, ${room.acStatus}) - Floor ${room.floor}`;
+                    roomSelectEl.appendChild(option);
+                }
+            });
+            updateCounts();
+        }
+
+        bookingFormEl.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const roomId = parseInt(roomSelectEl.value);
+            const checkInDate = document.getElementById('check-in-date').value;
+            const checkOutDate = document.getElementById('check-out-date').value;
+            const persons = parseInt(document.getElementById('persons').value);
+            const paymentMethod = document.getElementById('payment-method').value;
+
+            if (!roomId || !checkInDate || !checkOutDate || !persons || persons < 1) {
+                showMessage("Validation Error", "Please fill in all booking details and ensure the number of persons is a positive value.");
+                return;
+            }
+
+            const room = mockRooms.find(r => r.id === roomId);
+            if (!room || !room.available) {
+                showMessage("Booking Error", "This room is not available. Please select another.");
+                return;
+            }
+
+            const checkIn = new Date(checkInDate);
+            const checkOut = new Date(checkOutDate);
+
+            if (checkIn >= checkOut) {
+                showMessage("Date Error", "Check-out date must be after check-in date.");
+                return;
+            }
+
+            const diffTime = Math.abs(checkOut - checkIn);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const totalPrice = diffDays * room.price;
+
+            room.available = false;
+
+            const newBooking = {
+                roomNumber: room.number,
+                roomType: room.type,
+                acStatus: room.acStatus,
+                floor: room.floor,
+                checkInDate: checkInDate,
+                checkOutDate: checkOutDate,
+                persons: persons,
+                totalPrice: totalPrice,
+                paymentMethod: paymentMethod
+            };
+            bookingHistory.push(newBooking);
+
+            bookingInfoEl.innerHTML = `
+                <p class="font-bold">Room: ${room.type} (${room.number}, ${room.acStatus}) - Floor ${room.floor}</p>
+                <p>Check-in: ${checkInDate}</p>
+                <p>Check-out: ${checkOutDate}</p>
+                <p>Total Nights: ${diffDays}</p>
+                <p>Number of Persons: ${persons}</p>
+                <p>Total Price: $${totalPrice.toFixed(2)}</p>
+            `;
+            paymentDetailsTextEl.innerHTML = `
+                <p>Payment Method: <span class="font-bold">${paymentMethod}</span></p>
+                <p>Amount Paid: <span class="font-bold text-lg">$${totalPrice.toFixed(2)}</span></p>
+                <p class="mt-2 text-sm italic">This is a simulated payment. Thank you for your booking!</p>
+            `;
+            bookingDetailsEl.classList.remove('hidden');
+
+            renderRooms();
+            renderBookingHistory();
+
+            bookingFormEl.reset();
+        });
+
+        renderRooms();
+        renderBookingHistory();
+    </script>
+
+</body>
+</html>
